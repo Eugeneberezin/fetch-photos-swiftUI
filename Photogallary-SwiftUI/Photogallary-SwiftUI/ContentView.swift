@@ -16,6 +16,7 @@ enum SelectedPhotos: Int {
 struct ContentView: View {
     @State private var photos = [Photo]()
     @State private var selectedPhotos = SelectedPhotos.favorites
+    let gridItem = GridItem(.flexible(minimum: 0), spacing: 0)
     
     var body: some View {
         VStack {
@@ -38,16 +39,20 @@ struct ContentView: View {
                 
             })
             
-            List {
-                
-                ForEach(photos) { photo in
-                    photo.photo
-                        .resizable()
-                        .aspectRatio(1, contentMode: .fill)
-                        .border(Color.white)
+            
+            ScrollView(.vertical) {
+                LazyVGrid(columns: [gridItem, gridItem, gridItem], alignment: .center, spacing: 0) {
+                    
+                    ForEach(photos) { photo in
+                        photo.photo
+                            .resizable()
+                            .aspectRatio(1, contentMode: .fill)
+                            .border(Color.white)
+                    }
+                   
                 }
-                
             }
+            
         }
         .onAppear(perform: {
             requestAuthorizationAndFetchPhotos(selectedPhotos: .favorites)
