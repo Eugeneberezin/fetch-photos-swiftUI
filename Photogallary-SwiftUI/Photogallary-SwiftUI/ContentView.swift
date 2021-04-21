@@ -8,11 +8,36 @@
 import SwiftUI
 import Photos
 
+enum SelectedPhotos: Int {
+    case all = 1
+    case favorites = 0
+}
+
 struct ContentView: View {
     @State private var photos = [Photo]()
+    @State private var selectedPhotos = SelectedPhotos.favorites
     
     var body: some View {
         VStack {
+            Picker("Select Photos", selection: $selectedPhotos) {
+                Text("Favorites").tag(SelectedPhotos.favorites)
+                Text("All").tag(SelectedPhotos.all)
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            .onChange(of: selectedPhotos, perform: { selectedPhotos in
+                
+                switch selectedPhotos {
+                
+                case .all:
+                    photos = []
+                    requestAuthorizationAndFetchPhotos(selectedPhotos: .all)
+                case .favorites:
+                    photos = []
+                    requestAuthorizationAndFetchPhotos(selectedPhotos: .favorites)
+                }
+                
+            })
+            
             List {
                 
                 ForEach(photos) { photo in
@@ -25,8 +50,8 @@ struct ContentView: View {
             }
         }
         .onAppear(perform: {
-            fetchFavorites()
-//            requestAuthorizationAndFetchPhotos()
+            requestAuthorizationAndFetchPhotos(selectedPhotos: .favorites)
+
         })
     }
     
@@ -95,13 +120,19 @@ struct ContentView: View {
         
     }
     
-    func requestAuthorizationAndFetchPhotos() {
+    func requestAuthorizationAndFetchPhotos(selectedPhotos: SelectedPhotos) {
         PHPhotoLibrary.requestAuthorization { status in
             switch status {
             
             case .authorized:
                 DispatchQueue.main.async {
-                    fetchPhotos()
+                    switch selectedPhotos {
+                    
+                    case .all:
+                        fetchPhotos()
+                    case .favorites:
+                        fetchFavorites()
+                    }
                 }
                 
             
