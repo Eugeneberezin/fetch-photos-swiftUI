@@ -6,12 +6,31 @@
 //
 
 import SwiftUI
+import Photos
 
 struct ContentView: View {
+    @State private var photos = [Photo]()
+    
     var body: some View {
         VStack {
             List {
                 
+            }
+        }
+        .onAppear(perform: {
+            requestAuthorizationAndFetchPhotos()
+        })
+    }
+    
+    func requestAuthorizationAndFetchPhotos() {
+        PHPhotoLibrary.requestAuthorization { status in
+            switch status {
+            
+            case .authorized:
+                break
+            
+            default:
+                break
             }
         }
     }
