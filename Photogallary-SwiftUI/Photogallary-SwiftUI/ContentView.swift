@@ -25,8 +25,40 @@ struct ContentView: View {
             }
         }
         .onAppear(perform: {
-            requestAuthorizationAndFetchPhotos()
+            fetchFavorites()
+//            requestAuthorizationAndFetchPhotos()
         })
+    }
+    
+    func fetchFavorites() {
+        let fetchOptions = PHFetchOptions()
+        let imgManager = PHImageManager.default()
+        let requestOptions = PHImageRequestOptions()
+        requestOptions.isSynchronous = true
+        requestOptions.deliveryMode = .highQualityFormat
+        fetchOptions.predicate = NSPredicate(format: "title = %@", "Favorites")
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: true)]
+        let favorites :PHFetchResult = PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: .smartAlbumFavorites, options: nil)
+        var assetCollection = PHAssetCollection()
+        
+        if let firstObject = favorites.firstObject {
+            assetCollection = firstObject
+        }
+        
+        let photoAssets = PHAsset.fetchAssets(in: assetCollection, options: nil)
+        
+        photoAssets.enumerateObjects { (asset, num, pointer) in
+            imgManager.requestImage(
+                for: asset,
+                targetSize: CGSize(width: 100, height: 200), contentMode: .aspectFit,
+                options: requestOptions) { (image, _) in
+                
+                let photo = Photo(photo: Image(uiImage: image ?? UIImage()))
+                
+                    photos.append(photo)
+                
+            }
+        }
     }
     
     func fetchPhotos() {
