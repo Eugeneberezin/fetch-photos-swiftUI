@@ -16,6 +16,9 @@ enum SelectedPhotos: Int {
 struct ContentView: View {
     @State private var photos = [Photo]()
     @State private var selectedPhotos = SelectedPhotos.favorites
+    @State private var isPhotosEmpty = false
+    @State private var isPhotoAccessAlertPresented = false
+    
     let gridItem = GridItem(.flexible(minimum: 0), spacing: 0)
     
     var body: some View {
@@ -49,13 +52,20 @@ struct ContentView: View {
                             .aspectRatio(1, contentMode: .fill)
                             .border(Color.white)
                     }
+                    .alert(isPresented: $isPhotosEmpty, content: {
+                        Alert(title: Text("No photos to display"), message: Text("Please add photos"), primaryButton: .default(Text("OK")), secondaryButton: .cancel())
+                    })
                    
                 }
             }
             
         }
+        .alert(isPresented: $isPhotoAccessAlertPresented, content: {
+            Alert(title: Text("Please allow access to your photo library"), message: nil, dismissButton: .cancel())
+        })
         .onAppear(perform: {
             requestAuthorizationAndFetchPhotos(selectedPhotos: .favorites)
+            
 
         })
     }
@@ -119,7 +129,7 @@ struct ContentView: View {
             }
         } else {
             DispatchQueue.main.async {
-                //isPhotosEmpty = true
+                isPhotosEmpty = true
             }
         }
         
@@ -142,7 +152,7 @@ struct ContentView: View {
                 
             
             default:
-                break
+                isPhotoAccessAlertPresented = true
             }
         }
     }
